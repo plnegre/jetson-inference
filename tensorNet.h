@@ -19,7 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
- 
+
 #ifndef __TENSOR_NET_H__
 #define __TENSOR_NET_H__
 
@@ -28,6 +28,7 @@
 #include "NvCaffeParser.h"
 
 #include <sstream>
+#include <vector>
 
 
 #if NV_TENSORRT_MAJOR > 1
@@ -38,7 +39,7 @@ typedef nvinfer1::DimsCHW Dims3;
 #define DIMS_W(x) x.d[2]
 
 #else
-typedef nvinfer1::Dims3 Dims3; 
+typedef nvinfer1::Dims3 Dims3;
 
 #define DIMS_C(x) x.c
 #define DIMS_H(x) x.h
@@ -63,11 +64,11 @@ public:
 	 * Destory
 	 */
 	virtual ~tensorNet();
-	
+
 	/**
 	 * Load a new network instance
 	 * @param prototxt File path to the deployable network prototxt
-	 * @param model File path to the caffemodel 
+	 * @param model File path to the caffemodel
 	 * @param mean File path to the mean value binary proto (NULL if none)
 	 * @param input_blob The name of the input blob data to the network.
 	 * @param output_blob The name of the output blob data from the network.
@@ -80,7 +81,7 @@ public:
 	/**
 	 * Load a new network instance with multiple output layers
 	 * @param prototxt File path to the deployable network prototxt
-	 * @param model File path to the caffemodel 
+	 * @param model File path to the caffemodel
 	 * @param mean File path to the mean value binary proto (NULL if none)
 	 * @param input_blob The name of the input blob data to the network.
 	 * @param output_blobs List of names of the output blobs from the network.
@@ -91,7 +92,7 @@ public:
 					  uint32_t maxBatchSize=2 );
 
 	/**
-	 * Manually enable layer profiling times.	
+	 * Manually enable layer profiling times.
 	 */
 	void EnableProfiler();
 
@@ -110,37 +111,37 @@ public:
 	 */
 	inline bool HasFP16() const		{ return mEnableFP16; }
 
-	
+
 protected:
 
 	/**
 	 * Constructor.
 	 */
 	tensorNet();
-			  
+
 	/**
 	 * Create and output an optimized network model
-	 * @note this function is automatically used by LoadNetwork, but also can 
+	 * @note this function is automatically used by LoadNetwork, but also can
 	 *       be used individually to perform the network operations offline.
 	 * @param deployFile name for network prototxt
 	 * @param modelFile name for model
 	 * @param outputs network outputs
-	 * @param maxBatchSize maximum batch size 
+	 * @param maxBatchSize maximum batch size
 	 * @param modelStream output model stream
 	 */
 	bool ProfileModel( const std::string& deployFile, const std::string& modelFile,
 				    const std::vector<std::string>& outputs,
 				    uint32_t maxBatchSize, std::ostream& modelStream);
-				
+
 	/**
 	 * Prefix used for tagging printed log output
 	 */
 	#define LOG_GIE "[GIE]  "
-	
+
 	/**
 	 * Logger class for GIE info/warning/errors
 	 */
-	class Logger : public nvinfer1::ILogger			
+	class Logger : public nvinfer1::ILogger
 	{
 		void log( Severity severity, const char* msg ) override
 		{
@@ -156,15 +157,15 @@ protected:
 	{
 	public:
 		Profiler() : timingAccumulator(0.0f)	{ }
-		
+
 		virtual void reportLayerTime(const char* layerName, float ms)
 		{
 			printf(LOG_GIE "layer %s - %f ms\n", layerName, ms);
 			timingAccumulator += ms;
 		}
-		
+
 		float timingAccumulator;
-		
+
 	} gProfiler;
 
 	/**
@@ -183,7 +184,7 @@ protected:
 	nvinfer1::IRuntime* mInfer;
 	nvinfer1::ICudaEngine* mEngine;
 	nvinfer1::IExecutionContext* mContext;
-	
+
 	uint32_t mWidth;
 	uint32_t mHeight;
 	uint32_t mInputSize;
@@ -194,9 +195,9 @@ protected:
 	bool     mEnableDebug;
 	bool	 mEnableFP16;
 	bool     mOverride16;
-	
+
 	Dims3 mInputDims;
-	
+
 	struct outputLayer
 	{
 		std::string name;
@@ -205,7 +206,7 @@ protected:
 		float* CPU;
 		float* CUDA;
 	};
-	
+
 	std::vector<outputLayer> mOutputs;
 };
 
